@@ -1,0 +1,29 @@
+{
+  "appId": "com.example.myapp",
+  "productName": "CMP_Method",
+  "directories": {
+    "output": "dist-electron",
+    "buildResources": "build"
+  },
+  "files": [
+    "build/**",
+    "main.js",
+    "index.html",
+    "!node_modules/**"
+  ],
+  "linux": {
+    "target": [
+      "AppImage"
+    ],
+    "artifactName": "${productName}.${ext}",
+    "category": "Utility",
+    "maintainer": "Mateusz <matmatrix50@gmail.com>"
+  },
+  "mac": {
+    "target": "dmg"
+  },
+  "win": {
+    "target": "nsis",
+     "artifactName": "${productName}.${ext}"
+  }
+}
