@@ -8,7 +8,7 @@ import './../basic.css';
 const Calculation_screen = () => {
   const navigate = useNavigate();
   const [rows, setRows] = useState(
-    Array.from({ length: 1 }, (_, index) => ({
+    Array.from({ length: 3 }, (_, index) => ({
       name: index < 26 ? String.fromCharCode(65 + index) : '',
       duration: '',
       range: '',
