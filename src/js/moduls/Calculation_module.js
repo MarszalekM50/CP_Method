@@ -1,104 +1,117 @@
 class Event {
-  constructor(id, earliestTime, latestTime, previousActivity, nextActivity) {
+  constructor(id) {
     this.id = id;
-    this.earliestTime = earliestTime;
-    this.latestTime = latestTime;
-    this.delta = latestTime - earliestTime;
-    this.previousActivity = previousActivity;
-    this.nextActivity = nextActivity;
+    this.earliestTime = 0;
+    this.latestTime = 0;
+    this.delta = 0;
+    this.outgoing = [];
   }
 }
 
 class Activity {
-  constructor(name, duration, range) {
+  constructor(name, duration, fromEvent, toEvent) {
     this.name = name;
-    this.duration = duration;
-    this.range = range;
-    this.events = [];
-  }
-
-  addEvent(event) {
-    this.events.push(event);
+    this.duration = parseFloat(duration);
+    this.fromEvent = fromEvent;
+    this.toEvent = toEvent;
   }
 }
 
 export const calculateResults = (rows) => {
   try {
-    let sum = 0;
-    let id = 1;
-    let prevActiv = "";
-    let nextActive = "";
+    const events = new Map();
+    const activities = [];
+    var totalDuration = 0;
 
-    const events = [];
-    const activities = rows.map((row, index) => {
+    // Pomocnicza funkcja do tworzenia lub pobierania zdarzenia
+    const getEvent = (id) => {
+      if (!events.has(id)) {
+        events.set(id, new Event(id));
+      }
+      return events.get(id);
+    };
+
+    rows.forEach((row, index) => {
       if (!row.name || !row.duration || !row.range) {
         throw new Error(`Brakujące dane w wierszu ${index + 1}`);
       }
 
-      const [start, end] = row.range.split('-').map(Number);
-
-      if (isNaN(start) || isNaN(end) || start >= end) {
+      const [from, to] = row.range.split('-').map(Number);
+      if (isNaN(from) || isNaN(to) || from >= to) {
         throw new Error(`Nieprawidłowy zakres w wierszu ${index + 1}`);
       }
 
-      if (index === 0) {
-        nextActive = row.name;
-      } else {
-        prevActiv = rows[index - 1].name;
-        nextActive = row.name;
-      }
+      const fromEvent = getEvent(from);
+      const toEvent = getEvent(to);
 
-      const event = new Event(id, sum, sum, prevActiv, nextActive);
-      events.push(event);
+      const activity = new Activity(row.name, row.duration, fromEvent.id, toEvent.id);
+      activities.push(activity);
+      fromEvent.outgoing.push(activity);
 
-      const activity = new Activity(row.name, parseFloat(row.duration), [start, end]);
-      activity.addEvent(event);
-
-      sum += parseInt(row.duration);
-      id++;
-      return activity;
+      totalDuration += activity.duration;
     });
 
-    const finalEvent = new Event(id, sum, sum, nextActive, "");
-    events.push(finalEvent);
-
-    activities.forEach((activity) => {
-      const matchingEvent = events.find((event) => event.id === activity.range[1]);
-      if (matchingEvent) {
-        activity.addEvent(matchingEvent);
-      }
+    // Forward pass: Obliczamy najwcześniejsze czasy
+    events.forEach((event) => {
+      event.outgoing.forEach((activity) => {
+        const targetEvent = getEvent(activity.toEvent);
+        targetEvent.earliestTime = Math.max(
+          targetEvent.earliestTime,
+          event.earliestTime + activity.duration
+        );
+      });
     });
 
-    const totalDuration = activities.reduce((sum, activity) => sum + activity.duration, 0);
+    // Backward pass: Obliczamy najpóźniejsze czasy
+    const eventList = Array.from(events.values()).reverse();
+    const lastEvent = eventList[0];
+    lastEvent.latestTime = lastEvent.earliestTime;
 
-    const totalRange = activities.reduce(
-      (acc, activity) => ({
-        start: Math.min(acc.start, activity.range[0]),
-        end: Math.max(acc.end, activity.range[1]),
-      }),
-      { start: Infinity, end: -Infinity }
-    );
+    eventList.forEach((event) => {
+      event.outgoing.forEach((activity) => {
+        const targetEvent = getEvent(activity.toEvent);
+        event.latestTime = Math.min(
+          event.latestTime || targetEvent.latestTime - activity.duration,
+          targetEvent.latestTime - activity.duration
+        );
+      });
+      event.delta = event.latestTime - event.earliestTime;
+    });
+
+    const totalRange = rows.reduce((acc, row) => {
+      const [start, end] = row.range.split('-').map(Number);
+      return {
+        start: acc.start === null ? start : Math.min(acc.start, start),
+        end: acc.end === null ? end : Math.max(acc.end, end),
+      };
+    }, { start: null, end: null });
+
+    // Ścieżka krytyczna
+    const criticalPathDuration = Array.from(events.values()).reduce((maxDuration, event) => {
+      return Math.max(maxDuration, event.latestTime);
+    }, 0);
 
     return {
-      events,
-      activities,
-      totalDuration,
-      totalRange,
+      events: Array.from(events.values()), //Tablica zdarzeń
+      activities, //Czynności
+      totalDuration: criticalPathDuration, // Czas trwabia ścieżki krytycznej (TR)
+      totalRange, //zakres
     };
   } catch (error) {
     return { error: error.message };
   }
 };
 
+//Przekazanie danych do konstruktora grafu
 export const generateGraphData = (events, activities) => {
   const nodes = events.map((event) => ({
     id: event.id,
-    label: `Zdarzenie ${event.id}\nCzas najwcześniejszy: ${event.earliestTime}\nCzas najpóźniejszy: ${event.latestTime}\nDelta: ${event.delta}`,
+    label: `Nr Zdarzenia ${event.id}\nCzas najwcześniejszy: ${event.earliestTime}\nCzas najpóźniejszy: ${event.latestTime}\nZapas: ${event.delta}`,
   }));
 
   const edges = activities.map((activity) => ({
-    from: activity.events[0].id,
-    to: activity.events[activity.events.length - 1].id,
+    from: activity.fromEvent,
+    to: activity.toEvent,
     label: `${activity.name} (${activity.duration}h)`,
   }));
 
