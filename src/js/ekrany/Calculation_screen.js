@@ -63,8 +63,8 @@ const Calculation_screen = () => {
     if (result.error) {
       setMessage(`Błąd danych: ${result.error}`);
     } else {
-      const { events, activities, totalDuration, totalRange } = result;
-      setMessage(`Dane poprawne\nSuma czasu: ${totalDuration} h\nZakres: ${totalRange.start}-${totalRange.end}`);
+      const { events, activities, totalDuration, totalRange, criticalPath } = result;
+      setMessage(`Dane poprawne\nSuma czasu: ${totalDuration} h\nZakres: ${totalRange.start}-${totalRange.end} \nŚcieżka Krytyczna: ${criticalPath}`);
 
       const graphData = generateGraphData(events, activities);
       setGraphData(graphData);

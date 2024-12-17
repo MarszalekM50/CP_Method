@@ -5,6 +5,7 @@ class Event {
     this.latestTime = 0;
     this.delta = 0;
     this.outgoing = [];
+    this.incoming = [];
   }
 }
 
@@ -47,34 +48,82 @@ export const calculateResults = (rows) => {
       const activity = new Activity(row.name, row.duration, fromEvent.id, toEvent.id);
       activities.push(activity);
       fromEvent.outgoing.push(activity);
+      toEvent.incoming.push(activity);
 
       totalDuration += activity.duration;
     });
 
-    // Forward pass: Obliczamy najwcześniejsze czasy
-    events.forEach((event) => {
-      event.outgoing.forEach((activity) => {
-        const targetEvent = getEvent(activity.toEvent);
-        targetEvent.earliestTime = Math.max(
-          targetEvent.earliestTime,
-          event.earliestTime + activity.duration
-        );
+     //Ustawienie tablicy w kolejności
+     const topologicalSort = (events) => {
+      const inDegree = new Map();
+      const queue = [];
+      const sortedEvents = [];
+
+      events.forEach((event) => {
+        inDegree.set(event.id, 0);
       });
-    });
+
+      events.forEach((event) => {
+        event.outgoing.forEach((activity) => {
+          const targetEvent = getEvent(activity.toEvent);
+          inDegree.set(targetEvent.id, inDegree.get(targetEvent.id) + 1);
+        });
+      });
+
+      events.forEach((event) => {
+        if (inDegree.get(event.id) === 0) {
+          queue.push(event);
+        }
+      });
+      while (queue.length > 0) {
+        const event = queue.shift();
+        sortedEvents.push(event);
+
+        event.outgoing.forEach((activity) => {
+          const targetEvent = getEvent(activity.toEvent);
+          inDegree.set(targetEvent.id, inDegree.get(targetEvent.id) - 1);
+          if (inDegree.get(targetEvent.id) === 0) {
+            queue.push(targetEvent);
+          }
+        });
+      }
+      return sortedEvents;
+    };
+
+    // Forward pass: Obliczamy najwcześniejsze czasy
+    var changed = true; // Zmienna śledząca, czy wystąpiła jakakolwiek zmiana
+    while (changed) {
+      changed = false;
+      events.forEach((event) => {
+        event.outgoing.forEach((activity) => {
+          const targetEvent = getEvent(activity.toEvent);
+          const newEarliestTime = event.earliestTime + activity.duration;
+
+          if (newEarliestTime > targetEvent.earliestTime) {
+            targetEvent.earliestTime = newEarliestTime;
+            changed = true;
+          }
+        });
+      });
+    }
 
     // Backward pass: Obliczamy najpóźniejsze czasy
-    const eventList = Array.from(events.values()).reverse();
-    const lastEvent = eventList[0];
+    const eventList = topologicalSort(Array.from(events.values()));
+    const reverseEventList = eventList.reverse();
+    const lastEvent = reverseEventList[0];
     lastEvent.latestTime = lastEvent.earliestTime;
-
     eventList.forEach((event) => {
+      var candidateTimes = [];
+
       event.outgoing.forEach((activity) => {
         const targetEvent = getEvent(activity.toEvent);
-        event.latestTime = Math.min(
-          event.latestTime || targetEvent.latestTime - activity.duration,
-          targetEvent.latestTime - activity.duration
-        );
+        candidateTimes.push(targetEvent.latestTime - activity.duration);
       });
+
+      if (candidateTimes.length > 0) {
+        event.latestTime = Math.min(...candidateTimes);
+      }
+
       event.delta = event.latestTime - event.earliestTime;
     });
 
@@ -91,11 +140,39 @@ export const calculateResults = (rows) => {
       return Math.max(maxDuration, event.latestTime);
     }, 0);
 
+    // Znajdowanie ścieżki krytycznej
+    const findCriticalPath = (events, activities) => {
+      const criticalPath = [];
+
+      var currentEvent = events.find((event) => event.delta === 0 && event.earliestTime === 0);
+
+      while (currentEvent) {
+        criticalPath.push(currentEvent.id);
+
+        const nextActivity = activities.find(
+          (activity) =>
+            activity.fromEvent === currentEvent.id &&
+            events.find((e) => e.id === activity.toEvent).delta === 0
+        );
+
+        if (nextActivity) {
+          currentEvent = events.find((e) => e.id === nextActivity.toEvent);
+        } else {
+          currentEvent = null; // Koniec ścieżki krytycznej
+        }
+      }
+
+      return { criticalPath };
+    };
+
+    const criticalPath = findCriticalPath(Array.from(events.values()),activities);
+
     return {
       events: Array.from(events.values()), //Tablica zdarzeń
       activities, //Czynności
       totalDuration: criticalPathDuration, // Czas trwabia ścieżki krytycznej (TR)
       totalRange, //zakres
+      criticalPath, //ścieżka krytyczna
     };
   } catch (error) {
     return { error: error.message };
