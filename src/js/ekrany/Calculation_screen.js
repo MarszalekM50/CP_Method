@@ -20,6 +20,34 @@ const Calculation_screen = () => {
   const [totalRange, setTotalRange] = useState(null);
   const [criticalPath, setCriticalPath] = useState(null);
 
+  const validateData = () => {
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      // Walidacja 'name'
+      if (!row.name.trim()) {
+        return `Brak nazwy czynności w wierszu ${i + 1}`;
+      }
+      // Walidacja 'duration'
+      const duration = row.duration.trim().replace(',', '.');
+      if (!/^\d+$/.test(duration)) { // Sprawdzenie, czy to tylko liczba całkowita
+        return `Nieprawidłowy czas trwania w wierszu ${i + 1}. Czas musi być liczbą całkowitą.`;
+      }
+      const parsedDuration = parseInt(duration, 10);
+      if (isNaN(duration) || parsedDuration < 1) {
+        return `Czas trwania w wierszu ${i + 1} musi być większy lub równy 1 godzinie.`;
+      }
+      // Walidacja 'range'
+      const [from, to] = row.range.split('-').map(Number);
+      if (isNaN(from) || isNaN(to)) {
+        return `Zakres w wierszu ${i + 1} musi zawierać liczby całkowite.`;
+      }
+      if (from <= 0 || to <= 0 || from >= to) {
+        return `Zakres w wierszu ${i + 1} musi zawierać liczby całkowite większe niż 0, a początkowa liczba musi być mniejsza niż końcowa.`;
+      }
+    }
+    return null; // Wszystkie dane poprawne
+  };
+
   const InputChange = (index, field, value) => {
     const updatedRows = [...rows];
     updatedRows[index][field] = value;
@@ -59,6 +87,17 @@ const Calculation_screen = () => {
   };
 
   const Calculate = () => {
+
+    const validationError = validateData();
+    if (validationError) {
+      setMessage(validationError);
+      setGraphData(null);
+      setTotalDuration(null);
+      setTotalRange(null);
+      setCriticalPath(null);
+      return;
+    }
+
     const result = calculateResults(rows);
 
     if (result.error) {
@@ -142,7 +181,7 @@ const Calculation_screen = () => {
               <input
                 className="input-field"
                 type="text"
-                placeholder="Zakres (np. x-y)"
+                placeholder="Zakres (np. 1-2)"
                 value={row.range}
                 onChange={(e) => InputChange(index, 'range', e.target.value)}
               />
