@@ -18,6 +18,7 @@ const Calculation_screen = () => {
   const [graphData, setGraphData] = useState(null);
   const [totalDuration, setTotalDuration] = useState(null);
   const [totalRange, setTotalRange] = useState(null);
+  const [criticalPath, setCriticalPath] = useState(null);
 
   const InputChange = (index, field, value) => {
     const updatedRows = [...rows];
@@ -70,6 +71,7 @@ const Calculation_screen = () => {
       setGraphData(graphData);
       setTotalDuration(totalDuration);
       setTotalRange(totalRange);
+      setCriticalPath(criticalPath);
     }
   };
 
@@ -92,6 +94,7 @@ const Calculation_screen = () => {
           <GraphVisualization 
             graphData={graphData} 
             totalDuration={totalDuration}
+            criticalPath={criticalPath}
             totalRange={totalRange}
             onExit={() => graphWindow.close()}
         />

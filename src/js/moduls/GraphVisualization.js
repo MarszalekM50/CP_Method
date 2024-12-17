@@ -3,7 +3,7 @@ import { Network } from 'vis-network';
 import MyButton from '../components/Button';
 import CalculationResults from '../components/CalculationResults';
 
-const GraphVisualization = ({ graphData, onExit, totalDuration, totalRange }) => {
+const GraphVisualization = ({ graphData, onExit, totalDuration, totalRange, criticalPath }) => {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -71,7 +71,7 @@ const GraphVisualization = ({ graphData, onExit, totalDuration, totalRange }) =>
           backgroundColor: '#e0f7fa'
         }}>
         {/* Wyniki obliczeń */}
-        <CalculationResults totalDuration={totalDuration} totalRange={totalRange} />
+        <CalculationResults totalDuration={totalDuration} totalRange={totalRange} criticalPath={criticalPath}/>
       </div>
 
       {/* Kontener na grafikę */}
