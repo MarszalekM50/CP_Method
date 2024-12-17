@@ -1,4 +1,4 @@
-# CMP_Method
+# CP_Method
 
 ## Przygotowanie po pobraniu plików
 
