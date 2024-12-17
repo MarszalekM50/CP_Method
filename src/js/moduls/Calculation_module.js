@@ -165,7 +165,7 @@ export const calculateResults = (rows) => {
       return { criticalPath };
     };
 
-    const criticalPath = findCriticalPath(Array.from(events.values()),activities);
+    const {criticalPath} = findCriticalPath(Array.from(events.values()),activities);
 
     return {
       events: Array.from(events.values()), //Tablica zdarzeń

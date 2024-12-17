@@ -1,6 +1,6 @@
 {
   "appId": "com.example.myapp",
-  "productName": "CMP_Method",
+  "productName": "CP_Method",
   "directories": {
     "output": "dist-electron",
     "buildResources": "build"
