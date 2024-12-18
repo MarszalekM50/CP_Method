@@ -74,7 +74,6 @@ button:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
 }
 
 .bottom.button-container{
@@ -237,10 +236,12 @@ button:hover {
 /* Kontener dla twórców */
 .creators {
   margin-top: 20px;
+  max-height: 80vh;
+  overflow-y: auto;
   text-align: center;
   padding: 20px;
-  width: 80%;
-  height: 80%;
+  width: 100%;
+  height: 75vh;
 }
 
 .creator {
@@ -273,4 +274,48 @@ button:hover {
   flex-direction: column;
   align-items: center;
   gap: 20px;
+}
+/*historia*/
+.history-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: left;
+  padding: 20px;
+  width: 100%; 
+  height: 75vh;
+  overflow-y: auto;
+  margin-top: 20px;
+}
+
+.history-item {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  width: 80%;
+  max-width: 600px;
+  min-width: 300px; 
+}
+
+.history-item p {
+  margin: 5px 0;
+}
+
+.history-item strong {
+  font-size: 16px;
+  color: #333;
+}
+
+.small-button.center {
+  display: flex;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
 }

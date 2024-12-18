@@ -10,14 +10,17 @@ const CreatorsScreen = () => {
 
   return (
     <div className="app-container">
-      <div className="creators">
-        <h3 className="creators-title">Aplikacje wykonali:</h3>
-        <div className="creators-list">
-          <div className="creator">Mateusz Marszałek</div>
-          <div className="creator">Olaf Jurek</div>
+      <h2 className="center header-top">Twórcy</h2>
+      <div className="form-container">
+        <div className="creators">
+          <h3 className="creators-title">Aplikacje wykonali:</h3>
+          <div className="creators-list">
+            <div className="creator">Mateusz Marszałek</div>
+            <div className="creator">Olaf Jurek</div>
+          </div>
         </div>
       </div>
-      <div className="button-container bottom">
+      <div className="button-container">
         <button onClick={GoBack}>Powrót</button>
       </div>
     </div>
