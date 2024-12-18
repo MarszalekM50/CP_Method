@@ -19,6 +19,7 @@ const Calculation_screen = () => {
   const [totalDuration, setTotalDuration] = useState(null);
   const [totalRange, setTotalRange] = useState(null);
   const [criticalPath, setCriticalPath] = useState(null);
+  const [history, setHistory] = useState([]);
 
   const validateData = () => {
     for (let i = 0; i < rows.length; i++) {
@@ -104,6 +105,7 @@ const Calculation_screen = () => {
       setMessage(`Błąd danych: ${result.error}`);
     } else {
       const { events, activities, totalDuration, totalRange, criticalPath } = result;
+
       setMessage(`Dane poprawne\nSuma czasu: ${totalDuration} h\nZakres: ${totalRange.start}-${totalRange.end} \nŚcieżka Krytyczna: ${criticalPath}`);
 
       const graphData = generateGraphData(events, activities);
@@ -111,7 +113,27 @@ const Calculation_screen = () => {
       setTotalDuration(totalDuration);
       setTotalRange(totalRange);
       setCriticalPath(criticalPath);
+
+      const newHistoryItem = {
+        totalDuration,
+        totalRange,
+        criticalPath,
+        events,
+        activities,
+        graphData,
+        timestamp: new Date().toLocaleString(),
+      };
+      const previousHistory = JSON.parse(localStorage.getItem('history')) || [];
+
+      const updatedHistory = [...previousHistory, newHistoryItem];
+
+      localStorage.setItem('history', JSON.stringify(updatedHistory));
+      setHistory(updatedHistory);
     }
+  };
+
+  const OpenHistoryScreen = () => {
+    navigate('/History_screen', { state: { history } });
   };
 
   const OpenGraphWindow = () => {
@@ -197,7 +219,10 @@ const Calculation_screen = () => {
             <button onClick={AddRow}>Dodaj Czynność</button>
           </div>
           <div style={{ marginTop: '10px' }}>
-            <button onClick={Calculate}>Oblicz Wynik</button>
+            <button onClick={OpenHistoryScreen}>Historia Wyników</button>
+          </div>
+          <div style={{ marginTop: '10px' }}>
+            <button className='notify-button' onClick={Calculate}>Oblicz Wynik</button>
           </div>
           <div style={{ marginTop: 'auto' }}>
             <button onClick={() => navigate(-1)}>Powrót</button>

@@ -7,6 +7,17 @@ const GraphVisualization = ({ graphData, onExit, totalDuration, totalRange, crit
   const containerRef = useRef(null);
 
   useEffect(() => {
+
+    if (!graphData || !Array.isArray(graphData.nodes)) {
+      console.error('Błąd: graphData.nodes nie istnieje lub nie jest tablicą');
+      return;
+    }
+  
+    if (!Array.isArray(criticalPath)) {
+      console.error('Błąd: criticalPath nie jest tablicą');
+      return;
+    }
+
     const options = {
       layout: {
         hierarchical: {
@@ -18,30 +29,18 @@ const GraphVisualization = ({ graphData, onExit, totalDuration, totalRange, crit
       },
       nodes: {
         shape: 'circle',
-        font: {
-          size: 50,
-          color: '#ffffff',
-        },
+        font: {size: 50, color: '#ffffff'},
         size: 30,
-        color: {
-          background: '#007bff',
-          border: '#0056b3',
-        },
+        color: {background: '#007bff', border: '#0056b3'},
         margin: 10, 
         fixed: { x: true, y: true },
       },
       edges: {
-        arrows: { 
-          to: { enabled: true, scaleFactor: 3 }
-        },
+        arrows: {to: { enabled: true, scaleFactor: 3 }},
         color: '#848484',
         width: 3,
         length: 500,
-        font: {
-          align: 'middle',
-          size: 50,
-          color: '#000000',
-        },
+        font: {align: 'middle', size: 50, color: '#000000',},
       },
       interaction: {
         dragNodes: false,
@@ -53,10 +52,20 @@ const GraphVisualization = ({ graphData, onExit, totalDuration, totalRange, crit
       },
     };
 
-    const network = new Network(containerRef.current, graphData, options);
+    const coloredNodes = graphData.nodes.map((node) => {
+      const ctr = criticalPath.includes(node.id);
+      const backgroundColor = ctr ? '#ff0000' : '#007bff';
+      return {
+        ...node,
+        color: { background: backgroundColor },
+      };
+    });
+
+    const updatedGraphData = { ...graphData, nodes: coloredNodes };
+    const network = new Network(containerRef.current, updatedGraphData, options);
 
     return () => network.destroy(); // Czyszczenie instancji
-  }, [graphData]);
+  }, [graphData, criticalPath]);
 
   return (
     <div style={{ height: '100%', position: 'relative' }}>

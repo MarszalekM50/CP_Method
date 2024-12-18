@@ -74,7 +74,10 @@ button:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+}
+
+.bottom.button-container{
+  bottom: 0;
 }
 
 .notify-button {
@@ -228,4 +231,91 @@ button:hover {
 
 .message-box button {
   margin-top: 30px;
+}
+
+/* Kontener dla twórców */
+.creators {
+  margin-top: 20px;
+  max-height: 80vh;
+  overflow-y: auto;
+  text-align: center;
+  padding: 20px;
+  width: 100%;
+  height: 75vh;
+}
+
+.creator {
+  font-size: 2em;
+  color: #333;
+  font-weight: bold;
+  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 60%;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.creator:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.creators-title {
+  font-size: 2.5em;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 40px;
+  top: 0;
+}
+
+.creators-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+/*historia*/
+.history-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: left;
+  padding: 20px;
+  width: 100%; 
+  height: 75vh;
+  overflow-y: auto;
+  margin-top: 20px;
+}
+
+.history-item {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  width: 80%;
+  max-width: 600px;
+  min-width: 300px; 
+}
+
+.history-item p {
+  margin: 5px 0;
+}
+
+.history-item strong {
+  font-size: 16px;
+  color: #333;
+}
+
+.small-button.center {
+  display: flex;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
 }
