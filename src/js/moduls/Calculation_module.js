@@ -142,26 +142,30 @@ export const calculateResults = (rows) => {
 
     // Znajdowanie ścieżki krytycznej
     const findCriticalPath = (events, activities) => {
-      const criticalPath = [];
-
-      var currentEvent = events.find((event) => event.delta === 0 && event.earliestTime === 0);
-
-      while (currentEvent) {
-        criticalPath.push(currentEvent.id);
-
-        const nextActivity = activities.find(
-          (activity) =>
-            activity.fromEvent === currentEvent.id &&
-            events.find((e) => e.id === activity.toEvent).delta === 0
-        );
-
-        if (nextActivity) {
-          currentEvent = events.find((e) => e.id === nextActivity.toEvent);
-        } else {
-          currentEvent = null; // Koniec ścieżki krytycznej
-        }
+      const criticalPath = []; 
+      const criticalEvents = events.filter(
+        (event) => event.delta === 0
+      );
+      var currentEvents = criticalEvents.filter(
+        (event) => event.incoming.length === 0
+      );
+      while (currentEvents.length > 0) {
+        const nextEvents = [];
+        currentEvents.forEach((currentEvent) => {
+          if (!criticalPath.includes(currentEvent.id)) {
+            criticalPath.push(currentEvent.id);
+          }
+          currentEvent.outgoing.forEach((activity) => {
+            const targetEvent = events.find(
+              (e) => e.id === activity.toEvent
+            );
+            if (targetEvent && targetEvent.delta === 0) {
+              nextEvents.push(targetEvent);
+            }
+          });
+        });
+        currentEvents = nextEvents;
       }
-
       return { criticalPath };
     };
 

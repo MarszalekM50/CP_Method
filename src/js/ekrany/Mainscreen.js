@@ -23,7 +23,7 @@ const Mainscreen = () => {
 
   return (
     <div className="app-container">
-      <h2 className="center header-top">Wybierz ekran</h2>
+      <h2 className="center header-top">Optymalizacja wydajności metodą CPM</h2>
       <div className="button-container">
         <button onClick={Calculation_screen}>Obliczenia</button>
         <button onClick={History_screen}>Historia Wyników</button>
