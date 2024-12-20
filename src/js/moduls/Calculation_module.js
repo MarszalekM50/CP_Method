@@ -143,18 +143,18 @@ export const calculateResults = (rows) => {
     // Znajdowanie ścieżki krytycznej
     const findCriticalPath = (events, activities) => {
       const criticalPath = []; 
-      const criticalEvents = events.filter(
-        (event) => event.delta === 0
-      );
-      var currentEvents = criticalEvents.filter(
-        (event) => event.incoming.length === 0
-      );
+      const criticalEvents = events.filter((event) => event.delta === 0);
+
+      var currentEvents = criticalEvents.filter((event) => event.incoming.length === 0);
+
       while (currentEvents.length > 0) {
         const nextEvents = [];
+
         currentEvents.forEach((currentEvent) => {
           if (!criticalPath.includes(currentEvent.id)) {
             criticalPath.push(currentEvent.id);
           }
+
           currentEvent.outgoing.forEach((activity) => {
             const targetEvent = events.find(
               (e) => e.id === activity.toEvent
@@ -164,9 +164,10 @@ export const calculateResults = (rows) => {
             }
           });
         });
+
         currentEvents = nextEvents;
       }
-      return { criticalPath };
+      return { criticalPath: criticalPath.sort((a, b) => a - b) }; //sortowanie wyniku - potrzebne?
     };
 
     const {criticalPath} = findCriticalPath(Array.from(events.values()),activities);
